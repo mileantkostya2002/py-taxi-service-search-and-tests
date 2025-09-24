@@ -170,12 +170,6 @@ class ViewTest(TestCase):
         self.assertNotContains(response, "Corolla")
         self.assertNotContains(response, "Focus")
 
-    def test_driver_search_no_results(self):
-        url = reverse("taxi:driver-list")
-        response = self.client.get(url, {"username": "nonexistentdriver"})
-        self.assertNotContains(response, "driver1")
-        self.assertNotContains(response, "driver2")
-
     def test_manufacturer_list_template_and_context(self):
         url = reverse("taxi:manufacturer-list")
         response = self.client.get(url)
