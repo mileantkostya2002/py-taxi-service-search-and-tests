@@ -88,6 +88,11 @@ class ViewTest(TestCase):
             password="test12345",
             license_number="ABC12345"
         )
+        self.driver2 = Driver.objects.create_user(
+            username="driver2",
+            password="test12345",
+            license_number="DEF67890"
+        )
         self.client.login(username="driver1", password="test12345")
         self.car1 = Car.objects.create(
             model="Corolla", manufacturer=self.manufacturer
@@ -112,3 +117,74 @@ class ViewTest(TestCase):
         url = reverse("taxi:driver-list")
         response = self.client.get(url, {"username": "driver1"})
         self.assertContains(response, "driver1")
+
+
+    def test_manufacturer_list_empty_query_returns_all(self):
+        url = reverse("taxi:manufacturer-list")
+        response = self.client.get(url, {"name": ""})
+        self.assertContains(response, "Toyota")
+        self.assertContains(response, "Ford")
+
+    def test_manufacturer_list_no_query_returns_all(self):
+        url = reverse("taxi:manufacturer-list")
+        response = self.client.get(url)
+        self.assertContains(response, "Toyota")
+        self.assertContains(response, "Ford")
+
+    def test_car_list_empty_query_returns_all(self):
+        url = reverse("taxi:car-list")
+        response = self.client.get(url, {"model": ""})
+        self.assertContains(response, "Corolla")
+        self.assertContains(response, "Focus")
+
+    def test_car_list_no_query_returns_all(self):
+        url = reverse("taxi:car-list")
+        response = self.client.get(url)
+        self.assertContains(response, "Corolla")
+        self.assertContains(response, "Focus")
+
+    def test_driver_list_empty_query_returns_all(self):
+        url = reverse("taxi:driver-list")
+        response = self.client.get(url, {"username": ""})
+        self.assertContains(response, "driver1")
+        self.assertContains(response, "driver2")
+
+    def test_driver_list_no_query_returns_all(self):
+        url = reverse("taxi:driver-list")
+        response = self.client.get(url)
+        self.assertContains(response, "driver1")
+        self.assertContains(response, "driver2")
+
+    def test_manufacturer_search_no_results(self):
+        url = reverse("taxi:manufacturer-list")
+        response = self.client.get(url, {"name": "NonExistentManufacturer"})
+        self.assertNotContains(response, "Toyota")
+        self.assertNotContains(response, "Ford")
+
+    def test_car_search_no_results(self):
+        url = reverse("taxi:car-list")
+        response = self.client.get(url, {"model": "NonExistentCar"})
+        self.assertNotContains(response, "Corolla")
+        self.assertNotContains(response, "Focus")
+
+
+    def test_manufacturer_list_template_and_context(self):
+        url = reverse("taxi:manufacturer-list")
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, "taxi/manufacturer_list.html")
+        self.assertIn("search_form", response.context)
+        self.assertIsInstance(response.context["search_form"], ManufacturerSearchForm)
+
+    def test_car_list_template_and_context(self):
+        url = reverse("taxi:car-list")
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, "taxi/car_list.html")
+        self.assertIn("search_form", response.context)
+        self.assertIsInstance(response.context["search_form"], CarSearchForm)
+
+    def test_driver_list_template_and_context(self):
+        url = reverse("taxi:driver-list")
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, "taxi/driver_list.html")
+        self.assertIn("search_form", response.context)
+        self.assertIsInstance(response.context["search_form"], DriverSearchForm)
