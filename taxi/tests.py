@@ -1,5 +1,6 @@
 from django.urls import reverse
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 from taxi.models import Manufacturer, Car, Driver
 from taxi.forms import (
     CarSearchForm,
@@ -43,21 +44,21 @@ class FormTest(TestCase):
 
     def test_invalid_license_number_length(self):
         with self.assertRaisesMessage(
-                Exception,
+                ValidationError,
                 "License number should consist of 8 characters"
         ):
             validate_license_number("AB12")
 
     def test_invalid_license_number_format_letters(self):
         with self.assertRaisesMessage(
-                Exception,
+                ValidationError,
                 "First 3 characters should be uppercase letters"
         ):
             validate_license_number("abC12345")
 
     def test_invalid_license_number_format_digits(self):
         with self.assertRaisesMessage(
-                Exception,
+                ValidationError,
                 "Last 5 characters should be digits"
         ):
             validate_license_number("ABC12abC")
@@ -117,8 +118,9 @@ class ViewTest(TestCase):
         url = reverse("taxi:driver-list")
         response = self.client.get(url, {"username": "driver1"})
         self.assertContains(response, "driver1")
+        self.assertNotContains(response, "driver2")
 
-
+    # Tests for empty/missing queries returning full list
     def test_manufacturer_list_empty_query_returns_all(self):
         url = reverse("taxi:manufacturer-list")
         response = self.client.get(url, {"name": ""})
@@ -155,6 +157,7 @@ class ViewTest(TestCase):
         self.assertContains(response, "driver1")
         self.assertContains(response, "driver2")
 
+    # Tests for non-matching queries returning no results
     def test_manufacturer_search_no_results(self):
         url = reverse("taxi:manufacturer-list")
         response = self.client.get(url, {"name": "NonExistentManufacturer"})
@@ -167,7 +170,13 @@ class ViewTest(TestCase):
         self.assertNotContains(response, "Corolla")
         self.assertNotContains(response, "Focus")
 
+    def test_driver_search_no_results(self):
+        url = reverse("taxi:driver-list")
+        response = self.client.get(url, {"username": "nonexistentdriver"})
+        self.assertNotContains(response, "driver1")
+        self.assertNotContains(response, "driver2")
 
+    # Tests for correct templates and search_form in context
     def test_manufacturer_list_template_and_context(self):
         url = reverse("taxi:manufacturer-list")
         response = self.client.get(url)
