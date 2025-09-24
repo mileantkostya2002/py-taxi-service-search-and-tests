@@ -8,8 +8,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Driver, Car, Manufacturer
 from .forms import (DriverCreationForm, DriverLicenseUpdateForm,
-                    CarForm, CarSearchForm, DriverSearchForm, \
-    ManufacturerSearchForm)
+                    CarForm, CarSearchForm, DriverSearchForm,
+                    ManufacturerSearchForm)
 
 
 @login_required
@@ -57,7 +57,8 @@ class ManufacturerListView(LoginRequiredMixin, generic.ListView):
         if form.is_valid():
             username = form.cleaned_data.get("name")
             if username:
-                return self.queryset.filter(name__icontains=form.cleaned_data["name"])
+                return self.queryset.filter(
+                    name__icontains=form.cleaned_data["name"])
         return self.queryset
 
 
@@ -65,7 +66,6 @@ class ManufacturerCreateView(LoginRequiredMixin, generic.CreateView):
     model = Manufacturer
     fields = "__all__"
     success_url = reverse_lazy("taxi:manufacturer-list")
-
 
 
 class ManufacturerUpdateView(LoginRequiredMixin, generic.UpdateView):
@@ -87,8 +87,9 @@ class CarListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(
         self, *, object_list=None, **kwargs
     ):
-        context = super(CarListView, self).get_context_data(**kwargs)
-        model = self.request.GET.get("model","")
+        context = super(
+            CarListView, self).get_context_data(**kwargs)
+        model = self.request.GET.get("model", "")
         context["search_form"] = CarSearchForm(
             initial={"model": model}
         )
@@ -97,8 +98,10 @@ class CarListView(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         form = CarSearchForm(self.request.GET)
         if form.is_valid():
-            return self.queryset.filter(model__icontains=form.cleaned_data["model"])
+            return self.queryset.filter(
+                model__icontains=form.cleaned_data["model"])
         return self.queryset
+
 
 class CarDetailView(LoginRequiredMixin, generic.DetailView):
     model = Car
@@ -143,7 +146,8 @@ class DriverListView(LoginRequiredMixin, generic.ListView):
         if form.is_valid():
             username = form.cleaned_data.get("username")
             if username:
-                return self.queryset.filter(username__icontains=form.cleaned_data["username"])
+                return self.queryset.filter(
+                    username__icontains=form.cleaned_data["username"])
         return self.queryset
 
 
@@ -165,7 +169,7 @@ class DriverLicenseUpdateView(LoginRequiredMixin, generic.UpdateView):
 
 class DriverDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Driver
-    success_url = reverse_lazy('taxi:driver-list')
+    success_url = reverse_lazy("taxi:driver-list")
 
 
 @login_required

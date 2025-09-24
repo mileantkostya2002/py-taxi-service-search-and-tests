@@ -176,13 +176,13 @@ class ViewTest(TestCase):
         self.assertNotContains(response, "driver1")
         self.assertNotContains(response, "driver2")
 
-    # Tests for correct templates and search_form in context
     def test_manufacturer_list_template_and_context(self):
         url = reverse("taxi:manufacturer-list")
         response = self.client.get(url)
         self.assertTemplateUsed(response, "taxi/manufacturer_list.html")
         self.assertIn("search_form", response.context)
-        self.assertIsInstance(response.context["search_form"], ManufacturerSearchForm)
+        self.assertIsInstance(
+            response.context["search_form"], ManufacturerSearchForm)
 
     def test_car_list_template_and_context(self):
         url = reverse("taxi:car-list")
@@ -196,4 +196,5 @@ class ViewTest(TestCase):
         response = self.client.get(url)
         self.assertTemplateUsed(response, "taxi/driver_list.html")
         self.assertIn("search_form", response.context)
-        self.assertIsInstance(response.context["search_form"], DriverSearchForm)
+        self.assertIsInstance(
+            response.context["search_form"], DriverSearchForm)
